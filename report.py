@@ -4,21 +4,20 @@ import subprocess
 import sys
 import json
 
-session_key = sys.argv[1] if len(sys.argv) > 1 else "latest"
+meeting_key = sys.argv[1] if len(sys.argv) > 1 else "latest"
 
-# Fetch and save meetings data
 subprocess.run([
     "curl", "-s",
-    f"https://api.openf1.org/v1/meetings?meeting_key={session_key}",
+    f"https://api.openf1.org/v1/meetings?meeting_key={meeting_key}",
     "-o", "meetings.json"
 ])
 
-# Extract from the file
 with open("meetings.json") as f:
     meetings = json.load(f)
     flag_url = meetings[0]["country_flag"]
     circuit_url = meetings[0]["circuit_image"]
-    circuit_info_url = meetings[0]["circuit_info_url"]
+    circuit_info_url = meetings[0]["circuit_info_url"]    
+    meeting_name = meetings[0]["meeting_name"]
     subprocess.run([
     "curl", "-s",
     flag_url,
@@ -35,21 +34,20 @@ with open("meetings.json") as f:
     "-o", "circuit_info.json"
     ])
 
-# Continue with other fetches
 subprocess.run([
     "curl", "-s",
-    f"https://api.openf1.org/v1/drivers?session_key={session_key}",
+    f"https://api.openf1.org/v1/drivers?meeting_key={meeting_key}",
     "-o", "drivers.json"
 ])
 subprocess.run([
     "curl", "-s",
-    f"https://api.openf1.org/v1/sessions?session_key={session_key}",
+    f"https://api.openf1.org/v1/sessions?meeting_key={meeting_key}",
     "-o", "sessions.json"
 ])
 subprocess.run([
     "curl", "-s",
-    f"https://api.openf1.org/v1/session_result?session_key={session_key}",
+    f"https://api.openf1.org/v1/session_result?meeting_key={meeting_key}",
     "-o", "session_result.json"
 ])
 
-subprocess.run(["typst", "c", "report.typ"])
+subprocess.run(["typst", "c", "report.typ", "-o", meeting_name])
